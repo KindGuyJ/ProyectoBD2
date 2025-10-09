@@ -5,3 +5,7 @@ archivosCSV/movie_titles.csv
 archivosCSV/combined_data_3.txt
 archivosCSV/probe.txt
 archivosCSV/qualifying.txt
+bdsql.sql
+config_db.json
+netflix_full_with_titles.csv
+netflix.csv
