@@ -87,7 +87,8 @@ COMMENT='Tabla de hechos: cada registro representa una calificación';
 LOAD DATA LOCAL INFILE 'C:/Users/user/Desktop/Base de Datos 2/ProyectoBD2/output_dw/dim_pelicula.csv'
 INTO TABLE dim_pelicula
 FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
+OPTIONALLY ENCLOSED BY '"'
+ESCAPED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (movie_id, year_of_release, title);
