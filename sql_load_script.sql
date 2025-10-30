@@ -1,3 +1,7 @@
+-- Guardar el valor actual y habilitar temporalmente
+SET @old_local_infile := @@GLOBAL.local_infile;
+SET GLOBAL local_infile = 1;
+
 -- ================================================================
 -- SCRIPT DE CREACIÓN Y CARGA DEL DATA WAREHOUSE NETFLIX
 -- Basado en Metodología Hefesto - Esquema Estrella
@@ -80,7 +84,7 @@ COMMENT='Tabla de hechos: cada registro representa una calificación';
 -- o ajusta las rutas según tu configuración.
 
 -- Cargar dimensión PELÍCULA
-LOAD DATA LOCAL INFILE 'output_dw/dim_pelicula.csv'
+LOAD DATA LOCAL INFILE 'C:/Users/user/Desktop/Base de Datos 2/ProyectoBD2/output_dw/dim_pelicula.csv'
 INTO TABLE dim_pelicula
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
@@ -89,7 +93,7 @@ IGNORE 1 ROWS
 (movie_id, year_of_release, title);
 
 -- Cargar dimensión USUARIO
-LOAD DATA LOCAL INFILE 'output_dw/dim_usuario.csv'
+LOAD DATA LOCAL INFILE 'C:/Users/user/Desktop/Base de Datos 2/ProyectoBD2/output_dw/dim_usuario.csv'
 INTO TABLE dim_usuario
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
@@ -97,7 +101,7 @@ IGNORE 1 ROWS
 (customer_id);
 
 -- Cargar dimensión FECHA
-LOAD DATA LOCAL INFILE 'output_dw/dim_fecha.csv'
+LOAD DATA LOCAL INFILE 'C:/Users/user/Desktop/Base de Datos 2/ProyectoBD2/output_dw/dim_fecha.csv'
 INTO TABLE dim_fecha
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
@@ -105,7 +109,7 @@ IGNORE 1 ROWS
 (date_key, full_date, year, quarter, month, day, week_of_year);
 
 -- Cargar tabla de HECHOS
-LOAD DATA LOCAL INFILE 'output_dw/fact_rating.csv'
+LOAD DATA LOCAL INFILE 'C:/Users/user/Desktop/Base de Datos 2/ProyectoBD2/output_dw/fact_rating.csv'
 INTO TABLE fact_rating
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
@@ -179,3 +183,6 @@ LIMIT 10;
 -- ================================================================
 
 SELECT '✅ Data Warehouse cargado exitosamente' AS status;
+
+-- Restaurar el valor anterior
+SET GLOBAL local_infile = @old_local_infile;

@@ -9,3 +9,8 @@ bdsql.sql
 config_db.json
 netflix_full_with_titles.csv
 netflix.csv
+sql_load_script.sql
+output_dw/dim_fecha.csv
+output_dw/dim_usuario.csv
+output_dw/dim_pelicula.csv
+output_dw/fact_rating.csv
