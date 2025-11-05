@@ -88,20 +88,25 @@ def leer_titulos_con_comas(archivo_titulos):
             partes = line.strip().split(",", 2)
             if len(partes) == 3:
                 movie_id, year, movie_name = partes
-                # Limpiar year (puede tener NULL)
-                year = year.strip()
-                if year == "NULL" or not year:
-                    year = None
+                if year.isdigit():
+                    y = int(float(year)) ## en caso de años como 1999.0
                 else:
-                    try:
-                        year = int(year)
-                    except:
-                        year = None
-                data.append([int(movie_id), year, movie_name.strip()])
+                    y = 1800
+
+                data.append([int(movie_id), int(y), movie_name.strip()])
     return pd.DataFrame(data, columns=["movie_id", "year_of_release", "title"])
 
 dim_pelicula = leer_titulos_con_comas(archivo_titulos)
-dim_pelicula.to_csv(f"{OUTPUT_DIR}/dim_pelicula.csv", index=False)
+dim_pelicula.to_csv(
+    f"{OUTPUT_DIR}/dim_pelicula.csv",
+    index=False,
+    sep=",",
+    encoding="latin-1",
+    lineterminator="\n",
+    quoting=2,
+    quotechar='"',
+    doublequote=True,
+)
 print(f"  ✓ Dimensión Película creada: {len(dim_pelicula)} películas")
 print(f"  → {OUTPUT_DIR}/dim_pelicula.csv")
 
