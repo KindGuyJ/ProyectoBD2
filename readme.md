@@ -3,8 +3,8 @@ ETL y Data Warehouse - Netflix (Proyecto BD2)
 
 Integrantes:
 - Fernandez Favaron Juan Ignacio - 2307329
-- [INTEGRANTE 2 - Nombre Apellido - Legajo]  <-- completar con datos del PDF
-- [INTEGRANTE 3 - Nombre Apellido - Legajo]  <-- completar con datos del PDF
+- Caceres Federico
+- Giussano Pedro
 
 ## Resumen
 Este proyecto extrae, transforma y genera un pequeño data warehouse a partir
@@ -26,6 +26,9 @@ Instalar dependencias (ejemplo):
 ```powershell
 python -m pip install pandas
 ```
+Extraer los archivos de: https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data
+En la carpeta archivosCSV para poder correr el proyecto
+
 
 ## Cómo ejecutar el ETL (generar CSVs)
 1. Abrir un terminal en la carpeta del proyecto.
