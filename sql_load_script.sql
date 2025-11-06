@@ -1,7 +1,22 @@
 -- Guardar el valor actual y habilitar temporalmente
 SET @old_local_infile := @@GLOBAL.local_infile;
 SET GLOBAL local_infile = 1;
+-- Menos fsync durante carga (aceptando mínima pérdida si se corta la luz)
+SET @old_trx := @@GLOBAL.innodb_flush_log_at_trx_commit;
+SET GLOBAL innodb_flush_log_at_trx_commit = 2;
 
+-- Si usás binlog/replicación y NO necesitás registrar la carga:
+SET @old_sql_log_bin := @@SESSION.sql_log_bin;
+SET SESSION sql_log_bin = 0;
+
+-- Acelera validaciones
+SET @old_fk := @@SESSION.foreign_key_checks;
+SET @old_uc := @@SESSION.unique_checks;
+SET SESSION foreign_key_checks = 0;
+SET SESSION unique_checks = 0;
+
+-- Carga en una transacción grande
+SET autocommit = 0;
 -- ================================================================
 -- SCRIPT DE CREACIÓN Y CARGA DEL DATA WAREHOUSE NETFLIX
 -- Basado en Metodología Hefesto - Esquema Estrella
@@ -87,8 +102,8 @@ COMMENT='Tabla de hechos: cada registro representa una calificación';
 LOAD DATA LOCAL INFILE 'C:/Users/user/Desktop/Base de Datos 2/ProyectoBD2/output_dw/dim_pelicula.csv'
 INTO TABLE dim_pelicula
 FIELDS TERMINATED BY ','
-OPTIONALLY ENCLOSED BY '"'
-ESCAPED BY '"'
+optionally enclosed BY '"'
+ESCAPED BY '\\'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (movie_id, year_of_release, title);
@@ -121,6 +136,16 @@ IGNORE 1 ROWS
 -- PASO 5: VERIFICAR CARGA
 -- ================================================================
 
+COMMIT;
+
+-- Restaurar
+SET SESSION unique_checks = @old_uc;
+SET SESSION foreign_key_checks = @old_fk;
+SET SESSION sql_log_bin = @old_sql_log_bin;
+
+SET GLOBAL innodb_flush_log_at_trx_commit = @old_trx;
+SET autocommit = 1;
+
 SELECT 'Dimensión Película' AS tabla, COUNT(*) AS registros FROM dim_pelicula
 UNION ALL
 SELECT 'Dimensión Usuario', COUNT(*) FROM dim_usuario
@@ -133,19 +158,19 @@ SELECT 'Tabla Hechos Rating', COUNT(*) FROM fact_rating;
 -- PASO 6: CONSULTAS DE VALIDACIÓN
 -- ================================================================
 
--- Top 10 películas con mejor rating promedio (mínimo 100 calificaciones)
-SELECT 
-    p.title,
-    p.year_of_release,
-    COUNT(*) AS total_ratings,
-    AVG(f.rating_value) AS avg_rating,
-    MIN(f.rating_value) AS min_rating,
-    MAX(f.rating_value) AS max_rating
-FROM fact_rating f
-JOIN dim_pelicula p ON f.movie_id = p.movie_id
-GROUP BY p.movie_id, p.title, p.year_of_release
-HAVING total_ratings >= 100
-ORDER BY avg_rating DESC, total_ratings DESC
+-- Top 10 películas con mejor rating promedio
+WITH agg AS (
+  SELECT 
+    f.movie_id,
+    COUNT(*)   AS total_ratings,
+    AVG(f.rating_value) AS avg_rating
+  FROM fact_rating f
+  GROUP BY f.movie_id
+)
+SELECT p.title, p.year_of_release, a.total_ratings, a.avg_rating
+FROM agg a 
+JOIN dim_pelicula p ON p.movie_id = a.movie_id
+ORDER BY a.avg_rating DESC, a.total_ratings DESC
 LIMIT 10;
 
 -- Distribución de ratings
